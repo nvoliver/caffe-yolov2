@@ -1,45 +1,61 @@
-# YOLOV2 on Caffe
-This is an implementation of YOLO v2 inferenced using Caffe (pyCaffe) framework
+# YOLOv2 using Caffe
+This is an implementation for converting YOLOv2 from [DarkNet](http://pjreddie.com/darknet/) to Caffe, with the option to convert Leaky ReLU to default ReLU instead. It is a minimal fork of [this repo](https://github.com/nodefluxio/caffe-yolov2), and existing code has not been complemented with any docstrings or comments if they were missing.
+
+For the original YOLOv2 paper, see: ["Redmon, Joseph, and Ali Farhadi. “YOLO9000: Better, Faster, Stronger." arXiv preprint arXiv:1612.08242 (2016)](https://arxiv.org/abs/1612.08242).
 
 ## What's inside
-- Yolo to Caffe model converter (thanks to [Duangenquan](https://github.com/duangenquan/YoloV2NCS))
-
-- Sample application of YOLO v2 on PyCaffe (single image) -- `caffe-yolov2/yolo_main.py` (upgraded version of yolo main from [Xingwangsfu](https://github.com/xingwangsfu/caffe-yolo))
-
-- Validation, e.g. 
-..* subprocess script for running the main script several times 
-..* mAP calculation using VOC dataset (thanks to [AlexeyAB](https://github.com/AlexeyAB/darknet))
+- YOLO to Caffe model converter (thanks to [Duangenquan](https://github.com/duangenquan/YoloV2NCS)).
 
 ## Supported models
-Tiny YOLO v2 [cfg](https://github.com/pjreddie/darknet/blob/master/cfg/tiny-yolo-voc.cfg) [weights](https://pjreddie.com/media/files/tiny-yolo-voc.weights)
+Tiny YOLOv2: [cfg](https://raw.githubusercontent.com/pjreddie/darknet/e84933bfdd7315736c442a41d9aed163843dda54/cfg/yolov2-tiny.cfg) and [weights](https://pjreddie.com/media/files/tiny-yolo-voc.weights)
 
-## How to use it:
-**_NOTE !!!_** The following instructions assume that you already have a running Caffe distribution in Python. 
+YOLOv2 without Reorg and Route layers, without weight conversion: [cfg](https://raw.githubusercontent.com/pjreddie/darknet/e84933bfdd7315736c442a41d9aed163843dda54/cfg/yolov2-voc.cfg)
 
-Caffe v1.0 
-Installation instruction [here](http://caffe.berkeleyvision.org/installation.html)
+This converter does not support `Route` and `Reorg` layers.
 
-### Single image inference 
-1. Prepare the config file and pre-trained weights of the model (e.g tiny-yolo-voc)
-2. Convert it to Caffe representations(`.prototxt` and `.caffemodel`) using the provided script
-3. Run the `yolo_main.py` (add -h for arguments instructions) 
+## Getting started
+**NOTE** The following instructions assume that you already have a running Caffe v1.0 distribution in Python (see [here](http://caffe.berkeleyvision.org/installation.html) for instructions). Optionally you may make use of the `Dockerfile` included in this repo, see instructions for usage below.
 
-### Validating the performance
-1. As an example, we will be using *2012_val.txt* from VOC Dataset as our validation sets.
-2. Run ```caffe_valid_run.py``` to run our YOLO parser in Caffe, `yolo_main.py`, against the validation sets.
-3. It will produce the needed format in folder `results`
+1. Download the pre-trained YOLO models (config file `.cfg` and pre-trained weights `.weights`).
+
+2. Convert the config file using `create_yolo_prototxt.py`:
+```
+python create_yolo_prototxt.py -c CFG_INPUT -m PROTOTXT_OUTPUT [--noleaky for replacing Leaky ReLU with ReLU activation]
+```
+
+3. Convert the pre-trained weights using `create_yolo_caffemodel.py`:
+```
+python create_yolo_caffemodel.py [-h] -m PROTOTXT_INPUT -w WEIGHTS_INPUT -o CAFFEMODEL_OUTPUT
+``` 
+
+### Setup with Docker
+Build a Docker image with a minimal Caffe 1.0 installation, using the `Dockerfile` inside this repo:
+```
+docker build --network=host -t caffe-cpu18.04 .
+```
+
+Then create a Docker container based on this image and open a terminal inside:
+```
+docker run -v $PWD:/workspace --net=host -it caffe-cpu18.04 /bin/bash
+cd /workspace
+python3 create_yolo_prototxt.py [with arguments from above]
+python3 create_yolo_caffemodel.py [with arguments from above]
+
+```
+
+## Disclaimer
+Please note that unlike DarkNet, Caffe does not support default padding in their pooling layers. Depends on your model, you might find a difference in the output size. In our case of tiny-yolo-voc, Darknet produces 13x13x125 output whilst Caffe produces 12x12x125.
 
 ---
 ## Credits
 This application uses Open Source components. You can find the source code of their open source projects below. We acknowledge and are grateful to these developers for their contributions to open source.
 
-Project: Caffe-YOLO by Xingwangsfu (https://github.com/xingwangsfu/caffe-yolo)
-for the main application of YOLO v1 using pyCaffe
+Project: [YoloV2NCS](https://github.com/duangenquan/YoloV2NCS) by duangenquan
+for the YOLOv2 output parser and region parameter implementation
 
-Project: Darknet by AlexeyAB (originally from pjreddie) https://github.com/AlexeyAB/darknet
-for the mAP calculation on PascalVOC
+Project: [caffe-yolov2](https://github.com/nodefluxio/caffe-yolov2) by duangenquan, serving as the baseline for the YOLOv2 parser.
 
-Project: YoloV2NCS by duangenquan https://github.com/duangenquan/YoloV2NCS
-for the YOLO v2 output parser and region parameter implementation
+Project: [darknet](https://github.com/pjreddie/darknet) by pjreddie, the framework YOLOv2 is originally implemented in.
 
-
+## License
+The code is released under the YOLO license.
