@@ -53,7 +53,7 @@ This application uses Open Source components. You can find the source code of th
 Project: [YoloV2NCS](https://github.com/duangenquan/YoloV2NCS) by duangenquan
 for the YOLOv2 output parser and region parameter implementation
 
-Project: [caffe-yolov2](https://github.com/nodefluxio/caffe-yolov2) by duangenquan, serving as the baseline for the YOLOv2 parser.
+Project: [caffe-yolov2](https://github.com/nodefluxio/caffe-yolov2) by nodefluxio, serving as the baseline for the YOLOv2 parser.
 
 Project: [darknet](https://github.com/pjreddie/darknet) by pjreddie, the framework YOLOv2 is originally implemented in.
 
